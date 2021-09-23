@@ -5,20 +5,18 @@ import 'package:glitesearch/models/moviemodels.dart';
 import 'package:http/http.dart' as http;
 
 class MovieProvider with ChangeNotifier {
+  TextEditingController searchController = TextEditingController();
   List<MovieDataModel> allmovies = <MovieDataModel>[];
   List movies = [];
-  // String imdbId = '';
-  // String poster = '';
-  // String title = '';
-  // String year = '';
+  List<MovieDataModel> search = [];
+
   String url = 'http://www.omdbapi.com/?s=Batman&page=2&apikey=564727fa';
 
   Future<List<MovieDataModel>?> getmovie() async {
     final response = await http.get(Uri.parse(url));
     if (response.statusCode == 200) {
       final result = jsonDecode(response.body);
-      // var list = SearchFromJson(jsonEncode(result["Search"]));
-      // return list;
+
       Iterable list = result["Search"];
       return list.map((movie) => MovieDataModel.fromJson(movie)).toList();
     } else {
@@ -29,8 +27,21 @@ class MovieProvider with ChangeNotifier {
   Future<MovieDataModel?> populateAllMovies() async {
     var movies = await getmovie();
     allmovies = movies as List<MovieDataModel>;
-    // print(allmovies);
-    print(allmovies[0].poster);
+    CircularProgressIndicator();
     notifyListeners();
+  }
+
+  onSearch(String text) async {
+    search.clear();
+    if (text.isEmpty) {
+      return;
+    } else
+      search.forEach((e) {
+        if (e.title.contains(text) ||
+            e.imdbId.contains(text) ||
+            e.year.contains(text)) search.add(e);
+      });
+    notifyListeners();
+    print(search.length);
   }
 }

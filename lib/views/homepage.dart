@@ -13,82 +13,84 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  MovieProvider movieProvider = MovieProvider();
-  List<MovieDataModel> movies = [];
-  @override
-  void initState() {
-    super.initState();
-    movieProvider.populateAllMovies();
-  }
-
-  // void populateAllMovies() {
-  //   var movies = movieProvider.getmovie();
-  //   // var allmovies = movies;
-  //   movies = movies;
-  //   movieProvider.notifyListeners();
-  // }
-
+  List<MovieDataModel> search = [];
   @override
   Widget build(BuildContext context) {
-    movieProvider = Provider.of<MovieProvider>(context);
+    Provider.of<MovieProvider>(context, listen: false).populateAllMovies();
     return Scaffold(
-      // backgroundColor: Colors.black,
+      backgroundColor: Colors.black,
       appBar: AppBar(
-        // backgroundColor: Colors.black,
+        backgroundColor: Colors.black,
         leading: Icon(Icons.arrow_back),
       ),
-      body: Provider(
-        create: (context) => MovieProvider(),
-        child: Consumer(
-            builder: (context, movie, child) => (Container(
-                  child: Padding(
-                    padding: const EdgeInsets.all(10.0),
-                    child: Column(
+      body: SingleChildScrollView(
+        child: Container(
+          // color: Colors.red,
+          child: Consumer<MovieProvider>(builder: (context, movie, child) {
+            return Container(
+              child: Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Search',
-                              style: TextStyle(fontSize: 20),
-                            ),
-                            SizedBox(
-                              height: 5,
-                            ),
-                            CustomTextField(
-                              hinttext: 'Search',
-                              color: Colors.grey,
-                            ),
-                          ],
+                        Text(
+                          'Search',
+                          style: TextStyle(fontSize: 20),
                         ),
                         SizedBox(
-                          height: 10,
+                          height: 5,
                         ),
-                        Column(
+                        Container(
+                          height: 40,
+                          child: CustomTextField(
+                              controller: movie.searchController,
+                              hinttext: 'Search',
+                              color: Colors.grey,
+                              onchanged: () {
+                                movie.searchController.clear();
+
+                                movie.onSearch(movie.searchController.text);
+                              }
+                              // onchanged: () {
+                              // movie.searchController.clear();
+                              // movie.onSearch(movie.searchController.text);
+                              // movie.notifyListeners();
+                              // },
+                              ),
+                        ),
+                        ElevatedButton(
+                            onPressed: () {
+                              movie.onSearch(movie.searchController.text);
+                            },
+                            child: Text('search'))
+                      ],
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Container(
+                      child: SingleChildScrollView(
+                        child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
                               'Top Searches',
                               style: TextStyle(fontSize: 20),
                             ),
-                            ElevatedButton(
-                                onPressed: () {
-                                  movieProvider.populateAllMovies();
-                                },
-                                child: Text('data')),
-                            // MoviesWidget(movies: movies),
-                            MoviesWidget(movies: movies),
-                            Container(
-                                child: Column(
-                                    // children: [Text(movieProvider.poster)],
-                                    ))
+                            MoviesWidget()
                           ],
-                        )
-                      ],
-                    ),
-                  ),
-                ))),
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+              ),
+            );
+          }),
+        ),
       ),
     );
   }
